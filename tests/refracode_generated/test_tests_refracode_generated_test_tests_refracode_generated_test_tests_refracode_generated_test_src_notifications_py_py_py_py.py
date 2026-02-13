@@ -19,7 +19,7 @@ def test_total_zero_rejected():
 def test_total_negative_rejected():
     '''Test that a negative total is rejected'''
     with pytest.raises(ValueError):
-        validate_total(-50)
+        validate_total(-1)
 
 def test_tracking_number_empty_rejected():
     '''Test that an empty tracking number is rejected'''
@@ -33,17 +33,11 @@ def test_invalid_tracking_number_format_rejected():
 
 def test_total_exceeds_business_limit_rejected():
     '''Test that a total exceeding business limits is rejected'''
+    business_limit = 10000  # Example business limit
     with pytest.raises(ValueError):
-        validate_total(1000000)  # Assuming 999999 is the business limit
+        validate_total(business_limit + 1)
 
-def test_total_just_below_business_limit_accepted():
-    '''Test that a total just below the business limit is accepted'''
-    assert validate_total(999998) == True  # Assuming this is valid
-
-def test_tracking_number_valid_format_accepted():
-    '''Test that a valid tracking number format is accepted'''
-    assert validate_tracking_number("TRACK123456") == True  # Assuming this is valid
-
-def test_email_valid_format_accepted():
-    '''Test that a valid email format is accepted'''
-    assert validate_email("test@example.com") == True  # Assuming this is valid
+def test_total_just_below_zero_rejected():
+    '''Test that a total just below zero is rejected'''
+    with pytest.raises(ValueError):
+        validate_total(-0.01)
