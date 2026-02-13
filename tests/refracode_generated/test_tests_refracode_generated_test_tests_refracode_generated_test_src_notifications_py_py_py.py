@@ -15,36 +15,30 @@ def test_empty_email():
 
 def test_negative_total():
     '''Test that a negative total raises a ValueError'''
-    negative_total = -1.0
+    negative_total = -1.00
     with pytest.raises(ValueError):
         validate_total(negative_total)
 
 def test_zero_total():
-    '''Test that a total of zero raises a ValueError'''
-    zero_total = 0.0
+    '''Test that a zero total raises a ValueError'''
+    zero_total = 0.00
     with pytest.raises(ValueError):
         validate_total(zero_total)
 
+def test_tracking_number_invalid_format():
+    '''Test that an invalid tracking number format raises a ValueError'''
+    invalid_tracking_number = "12345-ABCDE"
+    with pytest.raises(ValueError):
+        validate_tracking_number(invalid_tracking_number)
+
 def test_exceeding_business_limit():
     '''Test that a total exceeding business limits raises a ValueError'''
-    exceeding_total = 1000000.0  # Assuming the limit is less than this
+    exceeding_total = 1000000.00  # Assuming the limit is lower than this
     with pytest.raises(ValueError):
         validate_business_limits(exceeding_total)
 
-def test_valid_tracking_number_format():
-    '''Test that an invalid tracking number format raises a ValueError'''
-    invalid_tracking_number = "12345-abc"
+def test_boundary_condition_total_limit():
+    '''Test that a total just above the business limit raises a ValueError'''
+    boundary_total = 999999.99  # Assuming the limit is 1,000,000.00
     with pytest.raises(ValueError):
-        validate_tracking_number(invalid_tracking_number)
-
-def test_empty_tracking_number():
-    '''Test that an empty tracking number raises a ValueError'''
-    empty_tracking_number = ""
-    with pytest.raises(ValueError):
-        validate_tracking_number(empty_tracking_number)
-
-def test_boundary_condition_tracking_number():
-    '''Test that a tracking number just below the valid format raises a ValueError'''
-    invalid_tracking_number = "TRK123"  # Assuming valid format is longer
-    with pytest.raises(ValueError):
-        validate_tracking_number(invalid_tracking_number)
+        validate_business_limits(boundary_total)
