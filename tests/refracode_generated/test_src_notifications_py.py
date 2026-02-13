@@ -1,50 +1,45 @@
 import pytest
-from src.notifications import validate_email, validate_total, validate_tracking_number, validate_business_limits
+from src.notifications import validate_email, validate_total, validate_tracking_number, check_business_limits
 
-def test_invalid_email_format():
-    '''Test that an invalid email format raises a ValueError'''
-    invalid_email = "invalid-email-format"
+def test_empty_email_rejected():
+    '''Test that an empty email is rejected as invalid format'''
     with pytest.raises(ValueError):
-        validate_email(invalid_email)
+        validate_email("")
 
-def test_empty_email():
-    '''Test that an empty email raises a ValueError'''
-    empty_email = ""
+def test_invalid_email_format_rejected():
+    '''Test that an email without "@" is rejected as invalid format'''
     with pytest.raises(ValueError):
-        validate_email(empty_email)
+        validate_email("invalidemail.com")
 
-def test_negative_total():
-    '''Test that a negative total raises a ValueError'''
-    negative_total = -10.0
+def test_negative_total_rejected():
+    '''Test that a total less than or equal to 0 is rejected'''
     with pytest.raises(ValueError):
-        validate_total(negative_total)
+        validate_total(-1)
 
-def test_zero_total():
-    '''Test that a zero total raises a ValueError'''
-    zero_total = 0.0
+def test_zero_total_rejected():
+    '''Test that a total of 0 is rejected'''
     with pytest.raises(ValueError):
-        validate_total(zero_total)
+        validate_total(0)
 
-def test_exceeding_business_limit():
-    '''Test that a total exceeding business limits raises a ValueError'''
-    exceeding_total = 1000000.0  # Assuming the limit is below this
+def test_exceeding_business_limit_rejected():
+    '''Test that a total exceeding business limits is rejected'''
     with pytest.raises(ValueError):
-        validate_business_limits(exceeding_total)
+        check_business_limits(1000000)  # Assuming 1000000 is above the limit
 
-def test_valid_tracking_number_format():
-    '''Test that an invalid tracking number format raises a ValueError'''
-    invalid_tracking_number = "12345-abc"
-    with pytest.raises(ValueError):
-        validate_tracking_number(invalid_tracking_number)
+def test_valid_email_format():
+    '''Test that a valid email format is accepted'''
+    assert validate_email("test@example.com") is True
 
-def test_empty_tracking_number():
-    '''Test that an empty tracking number raises a ValueError'''
-    empty_tracking_number = ""
-    with pytest.raises(ValueError):
-        validate_tracking_number(empty_tracking_number)
+def test_boundary_condition_total():
+    '''Test that a total equal to the business limit is accepted'''
+    assert check_business_limits(10000) is True  # Assuming 10000 is the limit
 
-def test_tracking_number_boundary_condition():
-    '''Test that a tracking number just below valid format raises a ValueError'''
-    invalid_tracking_number = "12345678901234567890"  # Assuming valid length is less
+def test_invalid_tracking_number_format_rejected():
+    '''Test that a tracking number with invalid format is rejected'''
     with pytest.raises(ValueError):
-        validate_tracking_number(invalid_tracking_number)
+        validate_tracking_number("12345")  # Assuming valid format requires more characters
+
+def test_empty_tracking_number_rejected():
+    '''Test that an empty tracking number is rejected'''
+    with pytest.raises(ValueError):
+        validate_tracking_number("")
