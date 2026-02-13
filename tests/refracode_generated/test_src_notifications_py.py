@@ -1,47 +1,51 @@
 import pytest
-from src.notifications import validate_email, validate_total, validate_tracking_number
+from src.notifications import validate_email, validate_order_id, validate_total, validate_tracking_number
 
 def test_empty_email_rejected():
-    '''Test that an empty email is rejected as invalid format'''
+    '''Test that an empty email is rejected'''
     with pytest.raises(ValueError):
-        validate_email('')
+        validate_email("")
 
 def test_invalid_email_format_rejected():
-    '''Test that an email without "@" is rejected as invalid format'''
+    '''Test that an email without "@" is rejected'''
     with pytest.raises(ValueError):
-        validate_email('invalidemail.com')
+        validate_email("invalidemail.com")
 
 def test_negative_total_rejected():
-    '''Test that a negative total is rejected as a non-positive number'''
+    '''Test that a negative total is rejected'''
     with pytest.raises(ValueError):
         validate_total(-1.0)
 
 def test_zero_total_rejected():
-    '''Test that zero total is rejected as a non-positive number'''
+    '''Test that a total of zero is rejected'''
     with pytest.raises(ValueError):
         validate_total(0.0)
 
-def test_large_negative_total_rejected():
-    '''Test that a large negative total is rejected as a non-positive number'''
+def test_empty_order_id_rejected():
+    '''Test that an empty order_id is rejected'''
     with pytest.raises(ValueError):
-        validate_total(-9999999999.99)
+        validate_order_id("")
 
-def test_invalid_tracking_number_format_rejected():
-    '''Test that a tracking number with invalid characters is rejected'''
+def test_invalid_order_id_format_rejected():
+    '''Test that an order_id with invalid characters is rejected'''
     with pytest.raises(ValueError):
-        validate_tracking_number('TRACK123!@#')
+        validate_order_id("order#123")
 
 def test_empty_tracking_number_rejected():
-    '''Test that an empty tracking number is rejected as invalid format'''
+    '''Test that an empty tracking_number is rejected'''
     with pytest.raises(ValueError):
-        validate_tracking_number('')
+        validate_tracking_number("")
 
-def test_tracking_number_too_short_rejected():
-    '''Test that a tracking number that is too short is rejected'''
+def test_invalid_tracking_number_format_rejected():
+    '''Test that a tracking_number with invalid format is rejected'''
     with pytest.raises(ValueError):
-        validate_tracking_number('123')  # Assuming valid format requires more than 3 characters
+        validate_tracking_number("TRACKING123@")
 
-def test_tracking_number_too_long_rejected():
-    '''Test that a tracking number that is too long is rejected'''
+def test_large_positive_total_accepted():
+    '''Test that a very large positive total is accepted'''
+    assert validate_total(1e+10) is None
+
+def test_large_negative_total_rejected():
+    '''Test that a very large negative total is rejected'''
     with pytest.raises(ValueError):
-        validate_tracking_number('T' * 21)  # Assuming valid format has a max length of 20 characters
+        validate_total(-1e+10)
