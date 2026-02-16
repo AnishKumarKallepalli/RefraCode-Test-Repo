@@ -1,0 +1,48 @@
+name: RefraCode Tests
+on:
+  pull_request:
+    paths:
+      - 'tests/refracode_generated/**'
+
+jobs:
+  refracode-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt 2>/dev/null || true && pip install pytest pytest-json-report
+
+      - name: Run RefraCode tests
+        id: run-tests
+        continue-on-error: true
+        run: pytest tests/refracode_generated/ --json-report --json-report-file=test-results.json 2>/dev/null || echo '{}' > test-results.json
+
+      - name: Report results
+        if: always()
+        env:
+          REFRACODE_TOKEN: ${{ secrets.REFRACODE_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -f test-results.json ] && [ -n "$REFRACODE_TOKEN" ]; then
+            python3 -c "
+          import json, os, sys
+          try:
+            with open('test-results.json') as f:
+              res = json.load(f)
+          except Exception:
+            res = {}
+          payload = {'pr_number': int(os.environ.get('PR_NUMBER', 0)), 'repo': os.environ.get('REPO', ''), 'results': res}
+          print(json.dumps(payload))
+          " > payload.json
+            curl -s -X POST https://refracode-backend-production.up.railway.app/webhook/test-results \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $REFRACODE_TOKEN" \
+              -d @payload.json || true
+          fi
