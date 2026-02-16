@@ -1,5 +1,5 @@
 """
-Email notification system
+Email notification system A
 """
 
 def send_order_confirmation(email, order_id, total):
