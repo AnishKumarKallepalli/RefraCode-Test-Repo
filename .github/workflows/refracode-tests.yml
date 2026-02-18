@@ -1,4 +1,4 @@
-# refracode-workflow-v2
+# refracode-workflow-v3
 name: RefraCode Tests
 on:
   pull_request:
@@ -22,6 +22,9 @@ jobs:
       - name: Run RefraCode tests
         id: run-tests
         continue-on-error: true
+        env:
+          # PYTHONPATH lets the generated tests import your project's source code
+          PYTHONPATH: ${{ github.workspace }}
         run: pytest tests/refracode_generated/ --json-report --json-report-file=test-results.json; true
 
       - name: Report results
@@ -30,15 +33,16 @@ jobs:
           REFRACODE_TOKEN: ${{ secrets.REFRACODE_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          PYTHONPATH: ${{ github.workspace }}
         run: |
-          if [ -f test-results.json ] && [ -n "$REFRACODE_TOKEN" ]; then
+          if [ -n "$REFRACODE_TOKEN" ]; then
             python3 -c "
           import json, os, sys
           try:
             with open('test-results.json') as f:
               res = json.load(f)
           except Exception:
-            res = {}
+            res = {'exitcode': -1, 'summary': {}, 'tests': [], 'collectors': []}
           payload = {'pr_number': int(os.environ.get('PR_NUMBER', 0)), 'repo': os.environ.get('REPO', ''), 'results': res}
           print(json.dumps(payload))
           " > payload.json
