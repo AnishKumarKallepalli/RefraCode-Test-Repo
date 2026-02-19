@@ -1,6 +1,6 @@
 import re
 
-# Valid tracking number: uppercase alphanumeric, minimum 4 characters
+# Valid tracking numbers: uppercase alphanumeric, minimum 4 characters
 _TRACKING_PATTERN = re.compile(r'^[A-Z0-9]{4,}$')
 # Basic RFC-compliant email pattern
 _EMAIL_PATTERN = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
